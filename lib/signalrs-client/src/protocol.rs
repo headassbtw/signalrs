@@ -97,14 +97,13 @@ pub struct Invocation<A> {
     #[serde(skip_serializing_if = "Option::is_none")]
     invocation_id: Option<String>,
     target: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    arguments: Option<A>,
+    arguments: A,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub stream_ids: Option<Vec<String>>,
 }
 
 impl<A> Invocation<A> {
-    pub fn non_blocking(target: impl Into<String>, arguments: Option<A>) -> Self {
+    pub fn non_blocking(target: impl Into<String>, arguments: A) -> Self {
         Invocation {
             r#type: MessageType::Invocation,
             headers: None,

@@ -120,9 +120,8 @@ impl<'a> InvocationBuilder<'a> {
     /// As soon as the message is sent from the client it returns to the caller.
     /// Server then processes the request asynchronously.
     pub async fn send(self) -> Result<(), ClientError> {
-        let arguments = args_as_option(self.arguments);
 
-        let mut invocation = Invocation::non_blocking(self.method, arguments);
+        let mut invocation = Invocation::non_blocking(self.method, self.arguments);
         invocation.with_streams(get_stream_ids(&self.streams));
 
         let serialized = self
@@ -144,9 +143,8 @@ impl<'a> InvocationBuilder<'a> {
     /// It follows semantics such as `void` methods or functions returning `()`.
     pub async fn invoke_unit(self) -> Result<(), ClientError> {
         let invocation_id = Uuid::new_v4().to_string();
-        let arguments = args_as_option(self.arguments);
 
-        let mut invocation = Invocation::non_blocking(self.method, arguments);
+        let mut invocation = Invocation::non_blocking(self.method, self.arguments);
         invocation.with_invocation_id(invocation_id.clone());
         invocation.with_streams(get_stream_ids(&self.streams));
 
