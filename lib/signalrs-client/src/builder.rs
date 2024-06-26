@@ -217,14 +217,10 @@ impl ClientBuilder {
                        .header("UID", uid)
             },
         };
-
-        println!("{:?}", request);
         
         let http_response = request.send().await?.error_for_status()?;
         
         let response: NegotiateResponseV0 = serde_json::from_str(&http_response.text().await?)?;
-        
-        println!("{:?}", response);
 
         Ok(response)
     }
