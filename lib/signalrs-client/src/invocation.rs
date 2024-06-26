@@ -173,9 +173,8 @@ impl<'a> InvocationBuilder<'a> {
     /// This function will cause errors if called with `()`. Use [`invoke_unit`](InvocationBuilder::invoke_unit) to do this.
     pub async fn invoke<T: DeserializeOwned>(self) -> Result<T, ClientError> {
         let invocation_id = Uuid::new_v4().to_string();
-        let arguments = args_as_option(self.arguments);
 
-        let mut invocation = Invocation::non_blocking(self.method, arguments);
+        let mut invocation = Invocation::non_blocking(self.method, self.arguments);
         invocation.with_invocation_id(invocation_id.clone());
         invocation.with_streams(get_stream_ids(&self.streams));
 

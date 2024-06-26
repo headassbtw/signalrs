@@ -48,6 +48,11 @@ pub enum Auth {
     Bearer {
         token: String,
     },
+    Resonite {
+        uid: String,
+        id: String,
+        token: String
+    },
 }
 
 /// Errors that can occur during building of the client
@@ -207,11 +212,19 @@ impl ClientBuilder {
             Auth::None => request,
             Auth::Basic { user, password } => request.basic_auth(user, password.clone()),
             Auth::Bearer { token } => request.bearer_auth(token),
+            Auth::Resonite { uid, id, token } => {
+                request.header("Authorization", format!("res {}:{}", id, token))
+                       .header("UID", uid)
+            },
         };
 
+        println!("{:?}", request);
+        
         let http_response = request.send().await?.error_for_status()?;
-
+        
         let response: NegotiateResponseV0 = serde_json::from_str(&http_response.text().await?)?;
+        
+        println!("{:?}", response);
 
         Ok(response)
     }
