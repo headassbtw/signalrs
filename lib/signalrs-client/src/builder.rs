@@ -4,9 +4,10 @@ use super::{hub::Hub, transport, SignalRClient};
 use crate::{
     messages::ClientMessage, protocol::NegotiateResponseV0, transport::error::TransportError,
 };
+use reqwest::header::HeaderValue;
 use thiserror::Error;
 use tokio::net::TcpStream;
-use tokio_tungstenite::{MaybeTlsStream, WebSocketStream};
+use tokio_tungstenite::{tungstenite::client::IntoClientRequest, MaybeTlsStream, WebSocketStream};
 use tracing::*;
 
 /// [`SignalRClient`] builder.
@@ -189,7 +190,19 @@ impl ClientBuilder {
 
         let url = format!("{}://{}?{}", scheme, domain_and_path, query);
 
-        let (ws_handle, _) = tokio_tungstenite::connect_async(url)
+        let mut request = url.into_client_request().unwrap();
+
+        match &self.auth {
+            Auth::None => {},
+            Auth::Basic { user, password } => unimplemented!(),
+            Auth::Bearer { token } => unimplemented!(),
+            Auth::Resonite { uid, id, token } => {
+                request.headers_mut().insert("UID", HeaderValue::from_str(uid).unwrap());
+                request.headers_mut().insert("Authorization", HeaderValue::from_str(&format!("res {}:{}", id, token)).unwrap());
+            }
+        };
+
+        let (ws_handle, _) = tokio_tungstenite::connect_async(request)
             .await
             .map_err(|error| BuilderError::Transport {
                 source: TransportError::Websocket { source: error },
